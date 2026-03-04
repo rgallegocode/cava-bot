@@ -2,8 +2,8 @@ name: Cava Bot Diario
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 07:00 UTC (08:00 AM o 09:00 AM en España)
-    - cron: '0 7 * * *'
+    # Se ejecuta todos los días a las 17:10 UTC (18:10 en España, horario invierno)
+    - cron: '10 17 * * *'
   workflow_dispatch: # Nos permite tener un botón para ejecutarlo a mano cuando queramos
 
 jobs:
