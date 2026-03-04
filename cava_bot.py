@@ -145,14 +145,10 @@ def trabajo_diario():
     print("--- Proceso finalizado ---\n")
 
 # ==========================================
-# 3. PROGRAMACIÓN DEL BOT
+# 3. EJECUCIÓN DEL BOT (VERSIÓN NUBE)
 # ==========================================
-
 # PRUEBA RÁPIDA
 # trabajo_diario()
 
-schedule.every().day.at("08:00").do(trabajo_diario)
-print("Cava Bot está en funcionamiento. Esperando la hora programada...")
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+if __name__ == "__main__":
+    trabajo_diario()
