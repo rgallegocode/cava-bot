@@ -3,7 +3,7 @@ name: Cava Bot Diario
 on:
   schedule:
     # Se ejecuta todos los días a las 07:00 UTC (08:00 AM o 09:00 AM en España)
-    - cron: '35 17 * * *'
+    - cron: '33 17 * * *'
 
 jobs:
   ejecutar-bot:
