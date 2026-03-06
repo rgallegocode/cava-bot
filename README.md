@@ -12,12 +12,12 @@ El sistema agrega noticias geopolíticas y financieras recientes, extrae el rend
 
 ## 🚀 Arquitectura y Flujo de Datos
 
-1. **Disparador (Cron Job):** Un flujo de trabajo de GitHub Actions ejecuta el script de Python todos los días a las 08:00 AM.
+1. **Disparador:** Un flujo de trabajo de GitHub Actions ejecuta el script de Python todos los días a las 08:00 AM.
 2. **Ingesta de Datos:**
    - **NewsAPI:** Extrae los titulares más relevantes de las últimas 24 horas sobre economía, mercado bursátil y geopolítica.
    - **Yahoo Finance (`yfinance`):** Recupera precios de cierre y variaciones porcentuales de ETFs representativos (MSCI World, Vanguard EM) y Bitcoin.
 3. **Procesamiento con LLM (Gemini 2.5 Flash):** Se construye un *prompt* inyectando los datos crudos del mercado. El modelo de lenguaje (LLM) aplica la personalidad configurada ("Cava"), identificando "Las Maldades" del mercado y formateando la salida (clima, viñetas, emojis y estado Bull/Bear).
-4. **Entrega:** El contenido final y formateado se envía a través de la API de Telegram al chat o canal configurado.
+4. **Entrega:** El contenido final y formateado se envía a través de la API de Telegram al chat.
 
 ## 🛠️ Tecnologías Utilizadas
 
