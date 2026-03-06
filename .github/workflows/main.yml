@@ -3,7 +3,7 @@ name: Cava Bot Diario
 on:
   schedule:
     # Ajusta esta hora luego. Ahora está a las 18:00 UTC (19:00 en España)
-    - cron: '09 11 * * *'
+    - cron: '00 12 * * *'
   workflow_dispatch: # Esta línea es la que crea el botón para forzarlo a mano
 
 jobs:
