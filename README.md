@@ -17,6 +17,14 @@ Cava Bot es un bot de Telegram automatizado que actúa como un analista financie
 
 El sistema agrega noticias geopolíticas y financieras recientes, extrae el rendimiento de activos clave (Renta Variable Global, Emergentes y Bitcoin) y utiliza la API de **Google Gemini 2.5 Flash** para sintetizar un boletín diario. Todo el flujo está orquestado y desplegado de manera *serverless* (sin servidor dedicado) utilizando **GitHub Actions**.
 
+## 📸 Cava Bot en Acción
+
+Así es como el bot entrega su resumen diario directamente en Telegram, analizando "Las Maldades" del mercado:
+
+<div align="center">
+  <img src="img/prueba.jpg" alt="Captura de pantalla de Cava Bot en Telegram" width="400" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
+
 ## 🚀 Arquitectura y Flujo de Datos
 
 1. **Disparador:** Un flujo de trabajo de GitHub Actions ejecuta el script de Python todos los días a las 08:00 AM.
