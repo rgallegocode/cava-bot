@@ -35,7 +35,7 @@ El sistema agrega noticias geopolíticas y financieras recientes, extrae el rend
 
 ## ⚙️ Configuración y Despliegue Local
 
-### 1. Clonar el repositorio e instalar dependencias
+### Clonar el repositorio e instalar dependencias
 ```bash
 git clone [https://github.com/tu-usuario/cava-bot.git](https://github.com/tu-usuario/cava-bot.git)
 cd cava-bot
