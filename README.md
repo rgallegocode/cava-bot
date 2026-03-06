@@ -22,7 +22,7 @@ El sistema agrega noticias geopolíticas y financieras recientes, extrae el rend
 Así es como el bot entrega su resumen diario directamente en Telegram, analizando "Las Maldades" del mercado:
 
 <div align="center">
-  <img src="img/prueba.jpg" alt="Captura de pantalla de Cava Bot en Telegram" width="400" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+  <img src="img/prueba.png" alt="Captura de pantalla de Cava Bot en Telegram" width="400" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 </div>
 
 ## 🚀 Arquitectura y Flujo de Datos
