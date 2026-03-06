@@ -1,14 +1,21 @@
-# 📈 Cava Bot - Resumen Financiero Diario
+<div align="center">
+  <img src="img/LogoCavaBot.jpg" alt="Logo de Cava Bot" width="200"/>
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-orange.svg)
-![GitHub Actions](https://img.shields.io/badge/Automatizado-GitHub_Actions-2088FF.svg)
+  <h1>📈 Cava Bot - Resumen Financiero Diario</h1>
 
-Cava Bot es un bot de Telegram automatizado que actúa como un analista financiero diario, inspirado en el inconfundible estilo del economista español José Luis Cava. Quizá no se pegue los mismos desayunos pero te saca del apuro.
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+    <img src="https://img.shields.io/badge/Gemini_2.5_Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini">
+    <img src="https://img.shields.io/badge/GitHub_Actions-Automatizado-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions">
+  </p>
+</div>
+
+<br>
+
+Cava Bot es un bot de Telegram automatizado que actúa como un analista financiero diario, inspirado en el inconfundible estilo del economista español José Luis Cava. Quizás no se pegue los mismos desayunos que él pero te saca del apuro.
+
 
 El sistema agrega noticias geopolíticas y financieras recientes, extrae el rendimiento de activos clave (Renta Variable Global, Emergentes y Bitcoin) y utiliza la API de **Google Gemini 2.5 Flash** para sintetizar un boletín diario. Todo el flujo está orquestado y desplegado de manera *serverless* (sin servidor dedicado) utilizando **GitHub Actions**.
-
-*[Aquí puedes incluir la imagen de un diagrama de secuencia que muestre cómo el trabajo cron dispara el script de Python, consulta las APIs y envía los datos al bot de Telegram]*
 
 ## 🚀 Arquitectura y Flujo de Datos
 
@@ -17,18 +24,18 @@ El sistema agrega noticias geopolíticas y financieras recientes, extrae el rend
    - **NewsAPI:** Extrae los titulares más relevantes de las últimas 24 horas sobre economía, mercado bursátil y geopolítica.
    - **Yahoo Finance (`yfinance`):** Recupera precios de cierre y variaciones porcentuales de ETFs representativos (MSCI World, Vanguard EM) y Bitcoin.
 3. **Procesamiento con LLM (Gemini 2.5 Flash):** Se construye un *prompt* inyectando los datos crudos del mercado. El modelo de lenguaje (LLM) aplica la personalidad configurada ("Cava"), identificando "Las Maldades" del mercado y formateando la salida (clima, viñetas, emojis y estado Bull/Bear).
-4. **Entrega:** El contenido final y formateado se envía a través de la API de Telegram al chat.
+4. **Entrega:** El contenido final y formateado se envía a través de la API de Telegram al chat o canal configurado.
 
 ## 🛠️ Tecnologías Utilizadas
 
-* **Lenguaje:** Python
+* **Lenguaje:** Python 3.14
 * **Inteligencia Artificial:** `google-genai` (Gemini 2.5 Flash)
 * **APIs de Datos:** `yfinance` (Mercados), `requests` (NewsAPI, API de Telegram)
 * **Automatización:** GitHub Actions (Programación mediante expresiones `cron`)
 
 ## ⚙️ Configuración y Despliegue Local
 
-### Clonar el repositorio e instalar dependencias
+### 1. Clonar el repositorio e instalar dependencias
 ```bash
 git clone [https://github.com/tu-usuario/cava-bot.git](https://github.com/tu-usuario/cava-bot.git)
 cd cava-bot
