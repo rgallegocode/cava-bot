@@ -1,5 +1,6 @@
 import datetime
 import os
+import time
 from pathlib import Path
 
 import pytz
@@ -35,14 +36,46 @@ def get_current_time_in_timezone(timezone: str) -> str:
         return f"Error fetching time for timezone '{timezone}': {str(e)}"
 
 
+class RateLimitedLiteLLMModel(LiteLLMModel):
+    """LiteLLMModel adaptado al plan gratuito de Gemini (5 peticiones/minuto).
+
+    Cada paso del agente es una llamada al LLM, así que se espacian las llamadas y, ante un 429 (cuota)
+    o 503 (saturación), se reintenta solo esa llamada en lugar de relanzar el agente entero.
+    """
+
+    def __init__(self, *args, min_interval: float = 13.0, max_retries: int = 4, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.min_interval = min_interval
+        self.max_retries = max_retries
+        self._last_call = 0.0
+
+    def __call__(self, *args, **kwargs):
+        for attempt in range(self.max_retries + 1):
+            wait = self.min_interval - (time.monotonic() - self._last_call)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_call = time.monotonic()
+            try:
+                return super().__call__(*args, **kwargs)
+            except Exception as e:
+                retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE"))
+                if not retryable or attempt == self.max_retries:
+                    raise
+                backoff = 30 * (attempt + 1)
+                print(f"Gemini sin cuota o saturado, reintento {attempt + 1}/{self.max_retries} en {backoff}s")
+                time.sleep(backoff)
+
+
 def build_model():
     """MODEL_PROVIDER=gemini (por defecto) o hf (Qwen2.5 vía HF Inference, el modelo del curso; requiere HF_TOKEN)."""
     provider = os.environ.get("MODEL_PROVIDER", "gemini").lower()
     if provider == "gemini":
-        return LiteLLMModel(
+        return RateLimitedLiteLLMModel(
+            min_interval=float(os.environ.get("GEMINI_MIN_INTERVAL", "13")),
             model_id=os.environ.get("GEMINI_MODEL", "gemini/gemini-2.5-flash"),
             api_key=os.environ.get("GEMINI_API_KEY"),
             temperature=0.5,
+            timeout=120,  # segundos por llamada: evita que un 503 lento deje el agente colgado
         )
     # Si el modelo está saturado, se puede usar el endpoint del curso que también sirve qwen2.5 coder:
     # HF_MODEL_ID='https://pflgm2locj2t89co.us-east-1.aws.endpoints.huggingface.cloud'
