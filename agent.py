@@ -58,13 +58,13 @@ class RateLimitedLiteLLMModel(LiteLLMModel):
             try:
                 return super().__call__(*args, **kwargs)
             except Exception as e:
-                retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE"))
+                retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE", "Timeout"))
                 # La cuota diaria (20 peticiones/día en el plan gratuito) no se recupera esperando unos segundos
                 daily_quota = "PerDay" in str(e)
                 if not retryable or daily_quota or attempt == self.max_retries:
                     raise
                 backoff = 30 * (attempt + 1)
-                print(f"Gemini sin cuota o saturado, reintento {attempt + 1}/{self.max_retries} en {backoff}s")
+                print(f"Gemini no disponible ({type(e).__name__}: {str(e)[:200]}), reintento {attempt + 1}/{self.max_retries} en {backoff}s")
                 time.sleep(backoff)
 
 
