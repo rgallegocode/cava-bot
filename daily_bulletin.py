@@ -13,8 +13,10 @@ DAILY_BULLETIN_TASK = """
 Write today's market report for your Telegram followers. The report MUST be written in Spanish.
 Before writing, gather real data with your tools: the weather in Málaga, the market snapshot,
 the Bull/Bear trend of the MSCI World (URTH) and the economy, stock market and geopolitics news of the last 24h.
-Be efficient: gather all that data in a single code block (one call per tool, news only once, in Spanish)
+Be efficient: gather all that data in a single code block (one call per tool, news only once with
+get_financial_news(query="economía OR bolsa OR mercados OR inflación OR BCE OR Fed", language="es"))
 and, in the next step, write the message and return it with final_answer.
+Only report news that appears in the tool results; skip headlines unrelated to markets or the economy.
 
 MANDATORY MESSAGE STRUCTURE (Telegram text, simple Markdown: *bold*, no tables):
 
