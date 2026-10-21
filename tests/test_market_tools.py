@@ -64,3 +64,14 @@ def test_trend_requires_200_sessions(fake_ticker):
     fake_ticker(market_trend, [100.0] * 50)
 
     assert "Not enough history" in market_trend.assess_market_trend(ticker="X")
+
+
+def test_asset_quote_includes_quote_currency(monkeypatch):
+    from conftest import FakeTicker
+
+    class TickerWithCurrency(FakeTicker):
+        fast_info = {"currency": "USD"}
+
+    monkeypatch.setattr(market_data.yf, "Ticker", lambda ticker: TickerWithCurrency([80000.0, 81000.0]))
+
+    assert "81,000.00 USD" in market_data.get_asset_quote(ticker="BTC-USD")

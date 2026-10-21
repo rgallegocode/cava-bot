@@ -9,20 +9,30 @@ DEFAULT_ASSETS = {
 }
 
 
+def _currency(asset) -> str:
+    """Quote currency of the asset (e.g. 'USD'), so the LLM never has to guess it."""
+    try:
+        return " " + asset.fast_info["currency"]
+    except Exception:
+        return ""
+
+
 def _quote_line(name: str, ticker: str, period: str = "5d") -> str:
     """Returns one line with the latest close and the change vs. the previous close."""
     try:
-        history = yf.Ticker(ticker).history(period=period)
+        asset = yf.Ticker(ticker)
+        history = asset.history(period=period)
         if history.empty:
             return f"- {name} ({ticker}): no data. Is the ticker valid?"
         last_close = history["Close"].iloc[-1]
+        price = f"{last_close:,.2f}{_currency(asset)}"
         if len(history) >= 2:
             prev_close = history["Close"].iloc[-2]
             change = ((last_close - prev_close) / prev_close) * 100
-            line = f"- {name} ({ticker}): {last_close:,.2f} ({change:+.2f}% vs. previous close)"
+            line = f"- {name} ({ticker}): {price} ({change:+.2f}% vs. previous close)"
         else:
             # Only one session available (weekend/holiday)
-            line = f"- {name} ({ticker}): {last_close:,.2f} (market closed / no change)"
+            line = f"- {name} ({ticker}): {price} (market closed / no change)"
         if len(history) >= 3:
             first_close = history["Close"].iloc[0]
             period_change = ((last_close - first_close) / first_close) * 100
