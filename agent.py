@@ -85,7 +85,7 @@ def build_model():
     if provider == "groq":
         return RateLimitedLiteLLMModel(
             tokens_per_minute=int(os.environ.get("GROQ_TPM", "8000")),
-            model_id=os.environ.get("GROQ_MODEL", "groq/openai/gpt-oss-120b"),
+            model_id=os.environ.get("GROQ_MODEL", "groq/qwen/qwen3.8-27b"),
             api_key=os.environ.get("GROQ_API_KEY"),
             temperature=0.5,
             timeout=120,  # segundos por llamada: evita que el agente se quede colgado
