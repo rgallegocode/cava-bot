@@ -3,6 +3,7 @@
 Uso: python daily_bulletin.py   (DRY_RUN=1 para imprimirlo sin enviarlo)
 """
 import os
+import time
 
 from agent import build_agent
 from telegram_client import send_telegram
@@ -34,9 +35,28 @@ Devuelve el mensaje completo como un único string con final_answer.
 """
 
 
+FALLBACK_GEMINI_MODEL = "gemini/gemini-2.5-flash-lite"
+MAX_ATTEMPTS = 3
+
+
+def generate_bulletin() -> str:
+    """Ejecuta el agente con reintentos: los picos de demanda de Gemini (503) suelen ser temporales.
+    El último intento usa un modelo más ligero como respaldo."""
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        if attempt == MAX_ATTEMPTS and os.environ.get("MODEL_PROVIDER", "gemini") == "gemini":
+            os.environ["GEMINI_MODEL"] = FALLBACK_GEMINI_MODEL
+        try:
+            return str(build_agent().run(TAREA_BOLETIN))
+        except Exception as e:
+            print(f"Intento {attempt}/{MAX_ATTEMPTS} fallido: {e}")
+            if attempt == MAX_ATTEMPTS:
+                raise
+            time.sleep(60 * attempt)
+
+
 def main():
     print("\n--- Iniciando Cava Agent ---")
-    bulletin = str(build_agent().run(TAREA_BOLETIN))
+    bulletin = generate_bulletin()
     if os.environ.get("DRY_RUN") == "1":
         print(bulletin)
     else:
