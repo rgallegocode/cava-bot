@@ -2,9 +2,14 @@ name: Cava Bot Diario
 
 on:
   schedule:
-    # Ajusta esta hora luego. Ahora está a las 18:00 UTC (19:00 en España)
+    # 07:00 UTC (08:00/09:00 en España según horario de invierno/verano)
     - cron: '00 07 * * *'
-  workflow_dispatch: # Esta línea es la que crea el botón para forzarlo a mano
+  workflow_dispatch: # botón para lanzarlo a mano
+    inputs:
+      dry_run:
+        description: 'Prueba: mostrar el boletín en el log sin enviarlo a Telegram'
+        type: boolean
+        default: true
 
 jobs:
   ejecutar-bot:
@@ -12,19 +17,22 @@ jobs:
     steps:
       - name: Descargar mi código
         uses: actions/checkout@v4
-      
+
       - name: Preparar Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
+
       - name: Instalar librerías
         run: pip install -r requirements.txt
-        
-      - name: Despertar a Cava Bot
+
+      - name: Despertar a Cava Agent
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python cava_bot.py
+          MODEL_PROVIDER: gemini
+          # El cron siempre envía; a mano, solo si se desmarca "dry_run"
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python daily_bulletin.py
