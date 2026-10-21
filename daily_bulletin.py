@@ -11,6 +11,8 @@ TAREA_BOLETIN = """
 Redacta el reporte diario del mercado para tus seguidores de Telegram.
 Antes de escribir, recoge datos reales con tus herramientas: el tiempo en Málaga, el snapshot de mercado,
 la tendencia (Bull/Bear) del MSCI World (URTH) y las noticias de economía, bolsa y geopolítica de las últimas 24h.
+Sé eficiente: recoge todos esos datos en un único bloque de código (una llamada a cada herramienta, noticias una sola vez
+en español) y, en el siguiente paso, redacta el mensaje y devuélvelo con final_answer.
 
 ESTRUCTURA OBLIGATORIA DEL MENSAJE (texto para Telegram, Markdown sencillo: *negrita*, sin tablas):
 

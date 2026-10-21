@@ -70,9 +70,10 @@ class RateLimitedLiteLLMModel(LiteLLMModel):
                 return response
             except Exception as e:
                 retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE", "Timeout"))
-                # Una cuota diaria agotada no se recupera esperando unos segundos
+                # Ni una cuota diaria agotada ni una petición demasiado grande se arreglan esperando
                 daily_quota = "PerDay" in str(e) or "per day" in str(e)
-                if not retryable or daily_quota or attempt == self.max_retries:
+                too_large = "Request too large" in str(e) or "413" in str(e)
+                if not retryable or daily_quota or too_large or attempt == self.max_retries:
                     raise
                 backoff = 30 * (attempt + 1)
                 print(f"LLM no disponible ({type(e).__name__}: {str(e)[:200]}), reintento {attempt + 1}/{self.max_retries} en {backoff}s")
@@ -121,7 +122,7 @@ def build_agent() -> CodeAgent:
             get_financial_news,
             get_weather,
             get_current_time_in_timezone,
-            DuckDuckGoSearchTool(),
+            DuckDuckGoSearchTool(max_results=5),
             VisitWebpageTool(),
             FinalAnswerTool(),  # no quitar final answer
         ],
