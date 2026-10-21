@@ -37,47 +37,66 @@ def get_current_time_in_timezone(timezone: str) -> str:
 
 
 class RateLimitedLiteLLMModel(LiteLLMModel):
-    """LiteLLMModel adaptado al plan gratuito de Gemini (5 peticiones/minuto).
+    """LiteLLMModel adaptado a los planes gratuitos (Groq: 30 peticiones y 8K tokens/minuto; Gemini: 5 peticiones/minuto).
 
-    Cada paso del agente es una llamada al LLM, así que se espacian las llamadas y, ante un 429 (cuota)
-    o 503 (saturación), se reintenta solo esa llamada en lugar de relanzar el agente entero.
+    Cada paso del agente es una llamada al LLM, así que se espacian las llamadas según las peticiones y los tokens
+    consumidos y, ante un 429 (cuota) o 503 (saturación), se reintenta solo esa llamada en lugar de relanzar el agente.
     """
 
-    def __init__(self, *args, min_interval: float = 13.0, max_retries: int = 4, **kwargs):
+    def __init__(self, *args, min_interval: float = 2.0, tokens_per_minute: int | None = None, max_retries: int = 4, **kwargs):
         super().__init__(*args, **kwargs)
         self.min_interval = min_interval
+        self.tokens_per_minute = tokens_per_minute
         self.max_retries = max_retries
         self._last_call = 0.0
+        self._last_tokens = 0
+
+    def _required_gap(self) -> float:
+        gap = self.min_interval
+        if self.tokens_per_minute:
+            # Los tokens de la llamada anterior tienen que "caber" en la ventana de un minuto
+            gap = max(gap, self._last_tokens / self.tokens_per_minute * 60)
+        return gap
 
     def __call__(self, *args, **kwargs):
         for attempt in range(self.max_retries + 1):
-            wait = self.min_interval - (time.monotonic() - self._last_call)
+            wait = self._required_gap() - (time.monotonic() - self._last_call)
             if wait > 0:
                 time.sleep(wait)
             self._last_call = time.monotonic()
             try:
-                return super().__call__(*args, **kwargs)
+                response = super().__call__(*args, **kwargs)
+                self._last_tokens = (self.last_input_token_count or 0) + (self.last_output_token_count or 0)
+                return response
             except Exception as e:
                 retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE", "Timeout"))
-                # La cuota diaria (20 peticiones/día en el plan gratuito) no se recupera esperando unos segundos
-                daily_quota = "PerDay" in str(e)
+                # Una cuota diaria agotada no se recupera esperando unos segundos
+                daily_quota = "PerDay" in str(e) or "per day" in str(e)
                 if not retryable or daily_quota or attempt == self.max_retries:
                     raise
                 backoff = 30 * (attempt + 1)
-                print(f"Gemini no disponible ({type(e).__name__}: {str(e)[:200]}), reintento {attempt + 1}/{self.max_retries} en {backoff}s")
+                print(f"LLM no disponible ({type(e).__name__}: {str(e)[:200]}), reintento {attempt + 1}/{self.max_retries} en {backoff}s")
                 time.sleep(backoff)
 
 
 def build_model():
-    """MODEL_PROVIDER=gemini (por defecto) o hf (Qwen2.5 vía HF Inference, el modelo del curso; requiere HF_TOKEN)."""
-    provider = os.environ.get("MODEL_PROVIDER", "gemini").lower()
+    """MODEL_PROVIDER=groq (por defecto), gemini o hf (Qwen2.5 vía HF Inference, el modelo del curso; requiere HF_TOKEN)."""
+    provider = os.environ.get("MODEL_PROVIDER", "groq").lower()
+    if provider == "groq":
+        return RateLimitedLiteLLMModel(
+            tokens_per_minute=int(os.environ.get("GROQ_TPM", "8000")),
+            model_id=os.environ.get("GROQ_MODEL", "groq/openai/gpt-oss-120b"),
+            api_key=os.environ.get("GROQ_API_KEY"),
+            temperature=0.5,
+            timeout=120,  # segundos por llamada: evita que el agente se quede colgado
+        )
     if provider == "gemini":
         return RateLimitedLiteLLMModel(
             min_interval=float(os.environ.get("GEMINI_MIN_INTERVAL", "13")),
             model_id=os.environ.get("GEMINI_MODEL", "gemini/gemini-3.8-flash"),
             api_key=os.environ.get("GEMINI_API_KEY"),
             temperature=0.5,
-            timeout=120,  # segundos por llamada: evita que un 503 lento deje el agente colgado
+            timeout=120,
         )
     # Si el modelo está saturado, se puede usar el endpoint del curso que también sirve qwen2.5 coder:
     # HF_MODEL_ID='https://pflgm2locj2t89co.us-east-1.aws.endpoints.huggingface.cloud'
