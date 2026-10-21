@@ -35,13 +35,13 @@ Devuelve el mensaje completo como un único string con final_answer.
 """
 
 
-FALLBACK_GEMINI_MODEL = "gemini/gemini-2.5-flash-lite"
+FALLBACK_GEMINI_MODEL = "gemini/gemini-flash-latest"
 MAX_ATTEMPTS = 3
 
 
 def generate_bulletin() -> str:
     """Ejecuta el agente con reintentos: los picos de demanda de Gemini (503) suelen ser temporales.
-    El último intento usa un modelo más ligero como respaldo."""
+    El último intento usa el alias gemini-flash-latest como respaldo."""
     for attempt in range(1, MAX_ATTEMPTS + 1):
         if attempt == MAX_ATTEMPTS and os.environ.get("MODEL_PROVIDER", "gemini") == "gemini":
             os.environ["GEMINI_MODEL"] = FALLBACK_GEMINI_MODEL

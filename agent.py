@@ -43,7 +43,6 @@ def build_model():
             model_id=os.environ.get("GEMINI_MODEL", "gemini/gemini-2.5-flash"),
             api_key=os.environ.get("GEMINI_API_KEY"),
             temperature=0.5,
-            num_retries=3,  # reintentos de LiteLLM ante errores 503/429 puntuales
         )
     # Si el modelo está saturado, se puede usar el endpoint del curso que también sirve qwen2.5 coder:
     # HF_MODEL_ID='https://pflgm2locj2t89co.us-east-1.aws.endpoints.huggingface.cloud'
