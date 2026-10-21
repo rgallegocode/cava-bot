@@ -74,7 +74,7 @@ def build_model():
     if provider == "gemini":
         return RateLimitedLiteLLMModel(
             min_interval=float(os.environ.get("GEMINI_MIN_INTERVAL", "13")),
-            model_id=os.environ.get("GEMINI_MODEL", "gemini/gemini-2.5-flash"),
+            model_id=os.environ.get("GEMINI_MODEL", "gemini/gemini-3.8-flash"),
             api_key=os.environ.get("GEMINI_API_KEY"),
             temperature=0.5,
             timeout=120,  # segundos por llamada: evita que un 503 lento deje el agente colgado
