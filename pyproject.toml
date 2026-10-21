@@ -12,7 +12,7 @@ extend-exclude = ["legacy", ".venv"]
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, bugbear, pyupgrade
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["E501"]  # las líneas largas de prompts y docstrings de tools son intencionadas
+ignore = ["E501"]  # long lines in prompts and tool docstrings are intentional
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

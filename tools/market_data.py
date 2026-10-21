@@ -1,7 +1,7 @@
 import yfinance as yf
 from smolagents import tool
 
-# ETFs representativos de los índices que sigue Cava Bot
+# Representative ETFs for the indices Cava Bot tracks
 DEFAULT_ASSETS = {
     "MSCI World (iShares URTH)": "URTH",
     "Vanguard Emerging Markets": "VWO",
@@ -10,26 +10,26 @@ DEFAULT_ASSETS = {
 
 
 def _quote_line(name: str, ticker: str, period: str = "5d") -> str:
-    """Devuelve una línea con el último cierre y la variación respecto al cierre anterior."""
+    """Returns one line with the latest close and the change vs. the previous close."""
     try:
         history = yf.Ticker(ticker).history(period=period)
         if history.empty:
-            return f"- {name} ({ticker}): sin datos. ¿Ticker válido?"
+            return f"- {name} ({ticker}): no data. Is the ticker valid?"
         last_close = history["Close"].iloc[-1]
         if len(history) >= 2:
             prev_close = history["Close"].iloc[-2]
             change = ((last_close - prev_close) / prev_close) * 100
-            line = f"- {name} ({ticker}): {last_close:,.2f} ({change:+.2f}% vs. cierre anterior)"
+            line = f"- {name} ({ticker}): {last_close:,.2f} ({change:+.2f}% vs. previous close)"
         else:
-            # Solo 1 sesión disponible (fin de semana/festivo)
-            line = f"- {name} ({ticker}): {last_close:,.2f} (Mercado cerrado/Sin variación)"
+            # Only one session available (weekend/holiday)
+            line = f"- {name} ({ticker}): {last_close:,.2f} (market closed / no change)"
         if len(history) >= 3:
             first_close = history["Close"].iloc[0]
             period_change = ((last_close - first_close) / first_close) * 100
-            line += f" | {period_change:+.2f}% en el periodo {period}"
-        return line + f" | fecha: {history.index[-1].date()}"
+            line += f" | {period_change:+.2f}% over {period}"
+        return line + f" | date: {history.index[-1].date()}"
     except Exception as e:
-        return f"- {name} ({ticker}): error al obtener datos ({e})"
+        return f"- {name} ({ticker}): error fetching data ({e})"
 
 
 @tool
@@ -47,4 +47,4 @@ def get_market_snapshot() -> str:
     """Gets today's closing price and daily change for Cava Bot's reference assets: MSCI World (URTH), Vanguard Emerging Markets (VWO) and Bitcoin (BTC-USD). Use it for the daily market report.
     """
     lines = [_quote_line(name, ticker) for name, ticker in DEFAULT_ASSETS.items()]
-    return "📊 DATOS REALES DEL MERCADO:\n" + "\n".join(lines)
+    return "📊 REAL MARKET DATA:\n" + "\n".join(lines)

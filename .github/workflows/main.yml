@@ -1,33 +1,33 @@
-name: Cava Bot Diario
+name: Daily bulletin
 
 on:
   schedule:
-    # 07:00 UTC (08:00/09:00 en España según horario de invierno/verano)
+    # 07:00 UTC (08:00/09:00 in Spain depending on daylight saving time)
     - cron: '00 07 * * *'
-  workflow_dispatch: # botón para lanzarlo a mano
+  workflow_dispatch: # manual run button
     inputs:
       dry_run:
-        description: 'Prueba: mostrar el boletín en el log sin enviarlo a Telegram'
+        description: 'Dry run: print the bulletin in the job log without sending it to Telegram'
         type: boolean
         default: true
 
 jobs:
-  ejecutar-bot:
+  bulletin:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # si el modelo no responde, el job se corta en vez de quedarse horas colgado
+    timeout-minutes: 20 # if the LLM stops responding, fail fast instead of hanging for hours
     steps:
-      - name: Descargar mi código
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Preparar Python
+      - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
-      - name: Instalar librerías
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Despertar a Cava Agent
+      - name: Run Cava Agent
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
@@ -36,6 +36,6 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           MODEL_PROVIDER: groq
           PYTHONUNBUFFERED: "1"
-          # El cron siempre envía; a mano, solo si se desmarca "dry_run"
+          # Scheduled runs always send; manual runs only when "dry_run" is unchecked
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
         run: python daily_bulletin.py

@@ -60,7 +60,7 @@ class TestRateLimitedModel:
         return model
 
     def _fake_llm(self, monkeypatch, outcomes):
-        """Hace que la llamada al LLM devuelva/lance, por orden, los elementos de outcomes."""
+        """Makes the LLM call return/raise the items of outcomes, in order."""
         outcomes = list(outcomes)
 
         def fake_call(self, *args, **kwargs):
@@ -81,15 +81,15 @@ class TestRateLimitedModel:
         self._fake_llm(monkeypatch, [Exception("RateLimitError 429 tokens per minute"), "ok"])
 
         assert model([]) == "ok"
-        assert 30 in model.sleeps  # backoff del primer reintento
+        assert 30 in model.sleeps  # first retry backoff
         assert model._last_tokens == 6000
 
     @pytest.mark.parametrize(
         "error",
         [
-            "429 GenerateRequestsPerDayPerProjectPerModel-FreeTier",  # cuota diaria
-            "413 Request too large for model",  # petición demasiado grande
-            "400 invalid_request_error",  # error no recuperable
+            "429 GenerateRequestsPerDayPerProjectPerModel-FreeTier",  # daily quota
+            "413 Request too large for model",  # oversized request
+            "400 invalid_request_error",  # non-recoverable error
         ],
     )
     def test_fails_fast_on_non_recoverable_errors(self, model, monkeypatch, error):

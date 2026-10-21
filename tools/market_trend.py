@@ -11,9 +11,9 @@ def assess_market_trend(ticker: str = "URTH") -> str:
     try:
         close = yf.Ticker(ticker).history(period="1y")["Close"]
     except Exception as e:
-        return f"Error obteniendo el histórico de {ticker}: {e}"
+        return f"Error fetching price history for {ticker}: {e}"
     if len(close) < 200:
-        return f"No hay suficiente histórico de {ticker} ({len(close)} sesiones) para calcular la SMA200."
+        return f"Not enough history for {ticker} ({len(close)} sessions) to compute the SMA200."
 
     last = close.iloc[-1]
     sma50 = close.rolling(50).mean().iloc[-1]
@@ -21,16 +21,16 @@ def assess_market_trend(ticker: str = "URTH") -> str:
     high_52w = close.max()
     drawdown = (last - high_52w) / high_52w * 100
 
-    # Bull: precio y SMA50 por encima de la SMA200 y lejos de una caída del 20% desde máximos
+    # Bull: price and SMA50 above the SMA200, and not down 20% or more from the 52-week high
     if last > sma200 and sma50 > sma200 and drawdown > -20:
         regime = "🐂 BULL MARKET"
     elif last < sma200 and sma50 < sma200:
         regime = "🐻 BEAR MARKET"
     else:
-        regime = "⚖️ TENDENCIA MIXTA / LATERAL"
+        regime = "⚖️ MIXED / SIDEWAYS TREND"
 
     cross = "golden cross (SMA50 > SMA200)" if sma50 > sma200 else "death cross (SMA50 < SMA200)"
     return (
-        f"{ticker}: {regime}. Cierre {last:,.2f} | SMA50 {sma50:,.2f} | SMA200 {sma200:,.2f} | {cross} | "
-        f"{drawdown:+.2f}% desde el máximo de 52 semanas ({high_52w:,.2f})."
+        f"{ticker}: {regime}. Close {last:,.2f} | SMA50 {sma50:,.2f} | SMA200 {sma200:,.2f} | {cross} | "
+        f"{drawdown:+.2f}% from the 52-week high ({high_52w:,.2f})."
     )

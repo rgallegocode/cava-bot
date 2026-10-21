@@ -14,7 +14,7 @@ def test_space_folder_contains_only_app_files(tmp_path):
 
     assert {"app.py", "agent.py", "Gradio_UI.py", "prompts.yaml", "requirements.txt", "README.md"} <= files
     assert "tools/market_data.py" in files
-    # Ni secretos, ni el bot de Telegram, ni tests/legacy acaban en la demo pública
+    # No secrets, Telegram sender, tests or legacy code end up in the public demo
     assert not any(f.startswith((".env", "tests/", "legacy/", ".github/")) for f in files)
     assert "telegram_client.py" not in files
     assert not any("__pycache__" in f for f in files)

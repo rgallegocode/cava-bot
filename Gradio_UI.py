@@ -148,7 +148,7 @@ def stream_to_gradio(
 
         yield from pull_messages_from_step(step_log)
 
-    # El último paso es la respuesta final; desde smolagents 1.13 llega envuelta en un FinalAnswerStep
+    # The last step is the final answer; since smolagents 1.13 it arrives wrapped in a FinalAnswerStep
     final_answer = step_log.final_answer if isinstance(step_log, FinalAnswerStep) else step_log
     final_answer = handle_agent_output_types(final_answer)
 
@@ -260,10 +260,12 @@ class GradioUI:
         with gr.Blocks(fill_height=True, title="Cava Agent") as demo:
             gr.Markdown(
                 "# 📈 Cava Agent\n"
-                "Analista financiero con IA al estilo de José Luis Cava. Consulta precios reales (Yahoo Finance), "
-                "tendencia Bull/Bear (SMA50/SMA200), noticias de las últimas 24h y el tiempo. "
-                "Despliega los pasos para ver cómo razona y qué herramientas usa.\n\n"
-                "*Construido con smolagents · [Hugging Face Agents Course](https://huggingface.co/learn/agents-course) · Contenido informativo, no constituye asesoramiento financiero.*"
+                "AI financial analyst agent with the blunt style of Spanish economist José Luis Cava. It checks real "
+                "prices (Yahoo Finance), computes the Bull/Bear trend (SMA50/SMA200) and reads the last 24h of news. "
+                "Expand the steps to see how it reasons and which tools it calls. Ask in English or Spanish: "
+                "it answers in your language.\n\n"
+                "*Built with smolagents · [Hugging Face Agents Course](https://huggingface.co/learn/agents-course) · "
+                "[Source code](https://github.com/rgallegocode/cava-bot) · For information only, not financial advice.*"
             )
             stored_messages = gr.State([])
             file_uploads_log = gr.State([])
@@ -286,12 +288,12 @@ class GradioUI:
                     [upload_file, file_uploads_log],
                     [upload_status, file_uploads_log],
                 )
-            text_input = gr.Textbox(lines=1, label="Pregunta a Cava Bot")
+            text_input = gr.Textbox(lines=1, label="Ask Cava Bot")
             gr.Examples(
                 examples=[
+                    "Is the S&P 500 (^GSPC) in a bull or bear market?",
+                    "How has Bitcoin performed this month, and what news explains it?",
                     "Dame el resumen del mercado de hoy y las maldades de la jornada",
-                    "¿Estamos en bull o bear market con el S&P 500 (^GSPC)?",
-                    "¿Cómo ha ido Bitcoin el último mes y qué noticias lo explican?",
                     "Compara el IBEX 35 (^IBEX) con el MSCI World este año",
                 ],
                 inputs=text_input,

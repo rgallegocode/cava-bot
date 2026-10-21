@@ -1,50 +1,53 @@
-"""Boletín diario de Cava Bot: el agente investiga con sus herramientas y redacta el reporte; después se envía a Telegram.
+"""Cava Bot daily bulletin: the agent researches the market with its tools, writes the report and sends it to Telegram.
 
-Uso: python daily_bulletin.py   (DRY_RUN=1 para imprimirlo sin enviarlo)
+Usage: python daily_bulletin.py   (DRY_RUN=1 prints it instead of sending it)
 """
 import os
 
 from agent import build_agent
 from telegram_client import send_telegram
 
-TAREA_BOLETIN = """
-Redacta el reporte diario del mercado para tus seguidores de Telegram.
-Antes de escribir, recoge datos reales con tus herramientas: el tiempo en Málaga, el snapshot de mercado,
-la tendencia (Bull/Bear) del MSCI World (URTH) y las noticias de economía, bolsa y geopolítica de las últimas 24h.
-Sé eficiente: recoge todos esos datos en un único bloque de código (una llamada a cada herramienta, noticias una sola vez
-en español) y, en el siguiente paso, redacta el mensaje y devuélvelo con final_answer.
+# The bulletin is published in Spanish for a Spanish-speaking Telegram audience: the section titles below are part
+# of the product, so they stay in Spanish while the instructions to the agent are in English.
+DAILY_BULLETIN_TASK = """
+Write today's market report for your Telegram followers. The report MUST be written in Spanish.
+Before writing, gather real data with your tools: the weather in Málaga, the market snapshot,
+the Bull/Bear trend of the MSCI World (URTH) and the economy, stock market and geopolitics news of the last 24h.
+Be efficient: gather all that data in a single code block (one call per tool, news only once, in Spanish)
+and, in the next step, write the message and return it with final_answer.
 
-ESTRUCTURA OBLIGATORIA DEL MENSAJE (texto para Telegram, Markdown sencillo: *negrita*, sin tablas):
+MANDATORY MESSAGE STRUCTURE (Telegram text, simple Markdown: *bold*, no tables):
 
-1. ☀️ El tiempo en Málaga: una sola frase breve con la temperatura y el estado del cielo reales.
+1. ☀️ El tiempo en Málaga: one short sentence with the real temperature and sky conditions.
 
-2. 📰 Resumen de las últimas 24h: las 5 noticias más importantes de la bolsa y la economía. Usa viñetas y emojis.
-   Sé extremadamente conciso y directo al grano. Incluye una mención a Bitcoin si los datos lo justifican.
+2. 📰 Resumen de las últimas 24h: the 5 most important stock market and economy news. Use bullets and emojis.
+   Be extremely concise and to the point. Mention Bitcoin if the data justifies it.
 
-3. 😈 Las Maldades del Mercado: un párrafo corto analizando lo peor de la jornada usando tu término estrella ("maldades").
-   Si el día ha sido espectacularmente bueno, di claramente que "hoy nos hemos librado de sus maldades".
+3. 😈 Las Maldades del Mercado: a short paragraph on the worst of the day, using your signature term ("maldades").
+   If the day was outstandingly good, say clearly "hoy nos hemos librado de sus maldades".
 
 4. 🔮 Previsión y Cierre de Mercado:
-   - Comienza indicando si estamos en 🐂 Bull Market o 🐻 Bear Market según assess_market_trend, con una justificación de una línea.
-   - Muestra OBLIGATORIAMENTE el cierre de los 3 activos del snapshot: 📈 al final si la variación es positiva, 📉 si es negativa.
-   - Formato exacto:
-     • MSCI World: [Precio] ([Variación]%) [Emoji]
-     • Vanguard Emerging Markets: [Precio] ([Variación]%) [Emoji]
-     • Bitcoin: $[Precio] USD ([Variación]%) [Emoji]
+   - Start by stating whether we are in a 🐂 Bull Market or 🐻 Bear Market according to assess_market_trend,
+     with a one-line justification.
+   - You MUST show the close of the 3 snapshot assets: 📈 at the end if the change is positive, 📉 if negative.
+   - Exact format:
+     • MSCI World: [Price] ([Change]%) [Emoji]
+     • Vanguard Emerging Markets: [Price] ([Change]%) [Emoji]
+     • Bitcoin: $[Price] USD ([Change]%) [Emoji]
 
-Devuelve el mensaje completo como un único string con final_answer.
+Return the whole message as a single string with final_answer.
 """
 
 
 def main():
-    print("\n--- Iniciando Cava Agent ---")
-    # Los reintentos ante 429/503 los gestiona el modelo (agent.RateLimitedLiteLLMModel)
-    bulletin = str(build_agent().run(TAREA_BOLETIN))
+    print("\n--- Starting Cava Agent ---")
+    # Retries on 429/503 are handled by the model wrapper (agent.RateLimitedLiteLLMModel)
+    bulletin = str(build_agent().run(DAILY_BULLETIN_TASK))
     if os.environ.get("DRY_RUN") == "1":
         print(bulletin)
     else:
         send_telegram(bulletin)
-    print("--- Proceso finalizado ---\n")
+    print("--- Done ---\n")
 
 
 if __name__ == "__main__":

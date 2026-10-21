@@ -18,7 +18,7 @@ from tools.web_search import DuckDuckGoSearchTool
 
 PROMPTS_PATH = Path(__file__).parent / "prompts.yaml"
 
-# En local las claves se leen de .env; en GitHub Actions y en el Space llegan como secretos
+# Locally the keys come from .env; in GitHub Actions and the Space they are injected as secrets
 load_dotenv(Path(__file__).parent / ".env")
 
 
@@ -37,10 +37,10 @@ def get_current_time_in_timezone(timezone: str) -> str:
 
 
 class RateLimitedLiteLLMModel(LiteLLMModel):
-    """LiteLLMModel adaptado a los planes gratuitos (Groq: 30 peticiones y 8K tokens/minuto; Gemini: 5 peticiones/minuto).
+    """LiteLLMModel tuned for free tiers (Groq: 30 requests and 8K tokens per minute; Gemini: 5 requests per minute).
 
-    Cada paso del agente es una llamada al LLM, así que se espacian las llamadas según las peticiones y los tokens
-    consumidos y, ante un 429 (cuota) o 503 (saturación), se reintenta solo esa llamada en lugar de relanzar el agente.
+    Every agent step is one LLM call, so calls are spaced out by request rate and tokens consumed, and on a
+    429 (quota) or 503 (overload) only that call is retried instead of restarting the whole agent run.
     """
 
     def __init__(self, *args, min_interval: float = 2.0, tokens_per_minute: int | None = None, max_retries: int = 4, **kwargs):
@@ -54,7 +54,7 @@ class RateLimitedLiteLLMModel(LiteLLMModel):
     def _required_gap(self) -> float:
         gap = self.min_interval
         if self.tokens_per_minute:
-            # Los tokens de la llamada anterior tienen que "caber" en la ventana de un minuto
+            # The previous call's tokens must fit within the one-minute window
             gap = max(gap, self._last_tokens / self.tokens_per_minute * 60)
         return gap
 
@@ -70,18 +70,18 @@ class RateLimitedLiteLLMModel(LiteLLMModel):
                 return response
             except Exception as e:
                 retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE", "Timeout"))
-                # Ni una cuota diaria agotada ni una petición demasiado grande se arreglan esperando
+                # Neither an exhausted daily quota nor an oversized request is fixed by waiting
                 daily_quota = "PerDay" in str(e) or "per day" in str(e)
                 too_large = "Request too large" in str(e) or "413" in str(e)
                 if not retryable or daily_quota or too_large or attempt == self.max_retries:
                     raise
                 backoff = 30 * (attempt + 1)
-                print(f"LLM no disponible ({type(e).__name__}: {str(e)[:200]}), reintento {attempt + 1}/{self.max_retries} en {backoff}s")
+                print(f"LLM unavailable ({type(e).__name__}: {str(e)[:200]}), retry {attempt + 1}/{self.max_retries} in {backoff}s")
                 time.sleep(backoff)
 
 
 def build_model():
-    """MODEL_PROVIDER=groq (por defecto), gemini o hf (Qwen2.5 vía HF Inference, el modelo del curso; requiere HF_TOKEN)."""
+    """MODEL_PROVIDER=groq (default), gemini or hf (Qwen2.5 via HF Inference, the course model; requires HF_TOKEN)."""
     provider = os.environ.get("MODEL_PROVIDER", "groq").lower()
     if provider == "groq":
         return RateLimitedLiteLLMModel(
@@ -89,7 +89,7 @@ def build_model():
             model_id=os.environ.get("GROQ_MODEL", "groq/qwen/qwen3.8-27b"),
             api_key=os.environ.get("GROQ_API_KEY"),
             temperature=0.5,
-            timeout=120,  # segundos por llamada: evita que el agente se quede colgado
+            timeout=120,  # seconds per call, so a slow provider cannot hang the agent
         )
     if provider == "gemini":
         return RateLimitedLiteLLMModel(
@@ -99,7 +99,7 @@ def build_model():
             temperature=0.5,
             timeout=120,
         )
-    # Si el modelo está saturado, se puede usar el endpoint del curso que también sirve qwen2.5 coder:
+    # If the model is overloaded, the course's endpoint also serves Qwen2.5 Coder:
     # HF_MODEL_ID='https://pflgm2locj2t89co.us-east-1.aws.endpoints.huggingface.cloud'
     return HfApiModel(
         max_tokens=2096,
@@ -124,14 +124,14 @@ def build_agent() -> CodeAgent:
             get_current_time_in_timezone,
             DuckDuckGoSearchTool(max_results=5),
             VisitWebpageTool(),
-            FinalAnswerTool(),  # no quitar final answer
+            FinalAnswerTool(),  # do not remove final answer
         ],
         max_steps=8,
         verbosity_level=1,
         grammar=None,
         planning_interval=None,
         name="cava_agent",
-        description="Analista financiero con el estilo de José Luis Cava.",
+        description="Financial analyst agent in the style of Spanish economist José Luis Cava.",
         additional_authorized_imports=["datetime", "math", "statistics"],
         prompt_templates=prompt_templates,
     )

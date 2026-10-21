@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import requests
 from smolagents import tool
 
-# Resultados compactos: el historial del agente se reenvía en cada paso y los planes gratuitos limitan los tokens
+# Compact results: the agent resends its whole history on every step and free tiers cap tokens per request
 MAX_ARTICLES = 8
 MAX_DESCRIPTION = 160
 
@@ -18,7 +18,7 @@ def get_financial_news(query: str = "economy OR stock market OR geopolitics", la
     """
     api_key = os.environ.get("NEWS_API_KEY")
     if not api_key:
-        return "NEWS_API_KEY no configurada. Usa la herramienta web_search para buscar noticias."
+        return "NEWS_API_KEY is not set. Use the web_search tool to look for news instead."
 
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     params = {
@@ -31,17 +31,17 @@ def get_financial_news(query: str = "economy OR stock market OR geopolitics", la
     try:
         response = requests.get("https://newsapi.org/v2/everything", params=params, timeout=20).json()
     except Exception as e:
-        return f"Error obteniendo noticias: {e}"
+        return f"Error fetching news: {e}"
 
     if response.get("status") != "ok":
-        return f"NewsAPI devolvió un error: {response.get('message', 'desconocido')}"
+        return f"NewsAPI returned an error: {response.get('message', 'unknown')}"
 
     articles = response.get("articles", [])[:MAX_ARTICLES]
     if not articles:
-        return f"No hay noticias de las últimas 24h para '{query}'. Prueba otra búsqueda o web_search."
+        return f"No news in the last 24h for '{query}'. Try another query or web_search."
 
     headlines = [
-        f"- {a.get('title', 'Sin título')}: {(a.get('description') or 'Sin descripción')[:MAX_DESCRIPTION]} ({a.get('source', {}).get('name', '')})"
+        f"- {a.get('title', 'Untitled')}: {(a.get('description') or 'No description')[:MAX_DESCRIPTION]} ({a.get('source', {}).get('name', '')})"
         for a in articles
     ]
     return "\n".join(headlines)

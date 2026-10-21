@@ -40,6 +40,10 @@ It was built as the **Unit 1 project of the [Hugging Face Agents Course](https:/
 | Assets | 3 fixed tickers | Any Yahoo Finance ticker, any period |
 | LLM | Gemini only | Pluggable via LiteLLM: Qwen3.8 27B on Groq (default), Gemini or Qwen2.5-Coder-32B (HF Inference) |
 
+### Language by design
+
+The codebase, tests, tooling and docs are in English. The **persona** is deliberately Spanish: the agent replies in the user's language (ask in English, get English), while the daily Telegram bulletin is published in Spanish for its Spanish-speaking audience, keeping Cava's trademark expressions such as *"las maldades"*.
+
 ### Architecture
 
 ```mermaid

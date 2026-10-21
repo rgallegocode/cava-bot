@@ -5,9 +5,9 @@ import requests
 
 
 def send_telegram(message: str) -> None:
-    """Envía el texto final al chat de Telegram configurado.
+    """Sends the final text to the configured Telegram chat.
 
-    No se expone como tool del agente: el Space es público y cualquiera podría usarlo para mandar mensajes.
+    Deliberately not exposed as an agent tool: the demo Space is public and anyone could use it to send messages.
     """
     token = os.environ["TELEGRAM_TOKEN"]
     chat_id = os.environ["CHAT_ID"]
@@ -16,8 +16,8 @@ def send_telegram(message: str) -> None:
 
     response = requests.post(url, data=payload, timeout=30)
     if not response.ok:
-        # Un Markdown mal formado hace fallar el envío: se reintenta como texto plano
+        # Malformed Markdown makes Telegram reject the message: retry as plain text
         payload.pop("parse_mode")
         response = requests.post(url, data=payload, timeout=30)
     response.raise_for_status()
-    print(f"[{datetime.now()}] Mensaje enviado a Telegram con éxito.")
+    print(f"[{datetime.now()}] Message sent to Telegram.")

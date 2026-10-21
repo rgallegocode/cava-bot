@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    # Solo se despliega si los tests de CI han pasado
+    # Deploy only after CI has passed
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -19,19 +19,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar huggingface_hub
+      - name: Install huggingface_hub
         run: pip install huggingface_hub
 
-      - name: Publicar en el Space
+      - name: Publish to the Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          # Una clave de Groq aparte para la demo pública protege la cuota del boletín diario
+          # A separate Groq key for the public demo protects the daily bulletin quota
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY_DEMO || secrets.GROQ_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           HF_SPACE: ${{ vars.HF_SPACE }}
         run: |
           if [ -z "$HF_TOKEN" ]; then
-            echo "::warning::Falta el secreto HF_TOKEN: no se despliega la demo."
+            echo "::warning::HF_TOKEN secret is missing: skipping the demo deployment."
             exit 0
           fi
           python scripts/deploy_space.py

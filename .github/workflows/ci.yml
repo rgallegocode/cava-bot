@@ -20,7 +20,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
       - name: Lint (ruff)

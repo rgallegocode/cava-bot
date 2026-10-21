@@ -4,12 +4,12 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-# Permite importar agent, tools, etc. desde la raíz del repo
+# Make agent, tools, etc. importable from the repo root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 class FakeTicker:
-    """Sustituye a yfinance.Ticker devolviendo un histórico de cierres fijo."""
+    """Stands in for yfinance.Ticker, returning a fixed close-price history."""
 
     def __init__(self, closes):
         self.closes = closes
@@ -21,7 +21,7 @@ class FakeTicker:
 
 @pytest.fixture
 def fake_ticker(monkeypatch):
-    """Uso: fake_ticker(module, closes) -> parchea module.yf.Ticker con esos cierres."""
+    """Usage: fake_ticker(module, closes) patches module.yf.Ticker to return those closes."""
 
     def _apply(module, closes):
         monkeypatch.setattr(module.yf, "Ticker", lambda ticker: FakeTicker(closes))

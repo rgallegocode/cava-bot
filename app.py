@@ -2,15 +2,15 @@ from agent import build_agent
 from Gradio_UI import GradioUI
 
 try:
-    # Hugging Face asigna ZeroGPU a los Spaces de cuentas gratuitas y exige al menos una función @spaces.GPU al arrancar.
-    # El LLM corre en Groq, así que esta función nunca se llama y la demo no consume GPU.
+    # Hugging Face assigns ZeroGPU to Spaces of free accounts and requires at least one @spaces.GPU function at startup.
+    # The LLM runs on Groq, so this function is never called and the demo uses no GPU time.
     import spaces
 
     @spaces.GPU
     def _zerogpu_placeholder():
         pass
 
-except ImportError:  # en local y en CI no hace falta
+except ImportError:  # not needed locally or in CI
     pass
 
 GradioUI(build_agent()).launch()
