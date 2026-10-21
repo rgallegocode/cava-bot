@@ -190,7 +190,10 @@ class GradioUI:
 
         messages.append(gr.ChatMessage(role="user", content=prompt))
         yield messages
-        for msg in stream_to_gradio(self.agent, task=prompt, reset_agent_memory=False):
+        # The strongly Spanish persona tends to override the system prompt's language rule; a task-level
+        # instruction is followed reliably
+        task = f"{prompt}\n\n(Write your final answer in the same language as the question above.)"
+        for msg in stream_to_gradio(self.agent, task=task, reset_agent_memory=False):
             messages.append(msg)
             yield messages
         yield messages
