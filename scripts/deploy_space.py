@@ -49,7 +49,10 @@ def main() -> None:
     api = HfApi(token=os.environ["HF_TOKEN"])
     space_id = os.environ.get("HF_SPACE") or f"{api.whoami()['name']}/cava-agent"
 
-    api.create_repo(space_id, repo_type="space", space_sdk="gradio", exist_ok=True)
+    api.create_repo(space_id, repo_type="space", space_sdk="gradio", space_hardware="cpu-basic", exist_ok=True)
+    # El LLM corre en Groq: no hace falta GPU (y ZeroGPU exige funciones @spaces.GPU)
+    if api.get_space_runtime(space_id).requested_hardware != "cpu-basic":
+        api.request_space_hardware(space_id, "cpu-basic")
     api.add_space_variable(space_id, "MODEL_PROVIDER", "groq")
     for secret in ("GROQ_API_KEY", "NEWS_API_KEY"):
         if os.environ.get(secret):
