@@ -1,9 +1,7 @@
 import re
-from typing import Any, Optional
+
 from smolagents.tools import Tool
-import requests
-import markdownify
-import smolagents
+
 
 class VisitWebpageTool(Tool):
     name = "visit_webpage"
@@ -16,7 +14,6 @@ class VisitWebpageTool(Tool):
             import requests
             from markdownify import markdownify
             from requests.exceptions import RequestException
-
             from smolagents.utils import truncate_content
         except ImportError as e:
             raise ImportError(

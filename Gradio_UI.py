@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 # Copyright 2024 The HuggingFace Inc. team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +16,6 @@ import mimetypes
 import os
 import re
 import shutil
-from typing import Optional
 
 from smolagents.agent_types import AgentAudio, AgentImage, AgentText, handle_agent_output_types
 from smolagents.agents import ActionStep, MultiStepAgent
@@ -127,7 +125,7 @@ def stream_to_gradio(
     agent,
     task: str,
     reset_agent_memory: bool = False,
-    additional_args: Optional[dict] = None,
+    additional_args: dict | None = None,
 ):
     """Runs an agent with the given task and streams the messages from the agent as gradio ChatMessages."""
     if not _is_package_available("gradio"):
@@ -148,10 +146,7 @@ def stream_to_gradio(
                 step_log.input_token_count = agent.model.last_input_token_count
                 step_log.output_token_count = agent.model.last_output_token_count
 
-        for message in pull_messages_from_step(
-            step_log,
-        ):
-            yield message
+        yield from pull_messages_from_step(step_log)
 
     final_answer = step_log  # Last log is the run's final_answer
     final_answer = handle_agent_output_types(final_answer)
@@ -203,11 +198,11 @@ class GradioUI:
         self,
         file,
         file_uploads_log,
-        allowed_file_types=[
+        allowed_file_types=(
             "application/pdf",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "text/plain",
-        ],
+        ),
     ):
         """
         Handle file uploads, default allowed types are .pdf, .docx, and .txt

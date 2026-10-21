@@ -1,5 +1,7 @@
-from typing import Any, Optional
+from typing import Any
+
 from smolagents.tools import Tool
+
 
 class FinalAnswerTool(Tool):
     name = "final_answer"

@@ -4,7 +4,11 @@
   <h1>📈 Cava Agent — AI Financial Analyst Agent</h1>
 
   <p>
-    <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+    <a href="https://github.com/rgallegocode/cava-bot/actions/workflows/ci.yml"><img src="https://github.com/rgallegocode/cava-bot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://github.com/rgallegocode/cava-bot/actions/workflows/main.yml"><img src="https://github.com/rgallegocode/cava-bot/actions/workflows/main.yml/badge.svg" alt="Daily bulletin"></a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
     <img src="https://img.shields.io/badge/smolagents-CodeAgent-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="smolagents">
     <img src="https://img.shields.io/badge/Gradio-Chat_UI-FF7C00?style=for-the-badge&logo=gradio&logoColor=white" alt="Gradio">
     <img src="https://img.shields.io/badge/Groq-Qwen3.8_27B-F55036?style=for-the-badge&logoColor=white" alt="Groq">
@@ -12,7 +16,8 @@
   </p>
 
   <p>
-    <a href="#-español">🇪🇸 Leer en español</a>
+    <b><a href="https://huggingface.co/spaces/rgbxv/cava-agent">🚀 Try the live demo</a></b>
+    · <a href="#-español">🇪🇸 Leer en español</a>
   </p>
 </div>
 
@@ -78,6 +83,8 @@ daily_bulletin.py    # daily task for the cron job → Telegram (DRY_RUN=1 print
 prompts.yaml         # smolagents prompts + Cava persona
 tools/               # custom tools
 telegram_client.py   # Telegram Bot API client
+tests/               # pytest suite (tools, agent, rate limiter, bulletin) — no network or API keys needed
+scripts/             # deploy_space.py: publishes the demo to Hugging Face Spaces
 legacy/cava_bot.py   # v1 (pipeline version)
 ```
 
@@ -86,12 +93,13 @@ legacy/cava_bot.py   # v1 (pipeline version)
 ```bash
 git clone https://github.com/rgallegocode/cava-bot.git
 cd cava-bot
-pip install -r requirements.txt gradio
+pip install -r requirements-dev.txt gradio
 
 cp .env.example .env         # fill in your keys (.env is git-ignored)
 
 python app.py                          # chat UI
 DRY_RUN=1 python daily_bulletin.py     # print today's bulletin
+pytest && ruff check .                 # tests + lint
 ```
 
 | Variable | Used by | Description |
@@ -103,8 +111,17 @@ DRY_RUN=1 python daily_bulletin.py     # print today's bulletin
 | `NEWS_API_KEY` | `get_financial_news` | newsapi.org key |
 | `TELEGRAM_TOKEN`, `CHAT_ID` | `daily_bulletin.py` | Telegram bot and chat |
 
-### Automation (GitHub Actions)
+### CI/CD (GitHub Actions)
 
+```mermaid
+flowchart LR
+    P[git push] --> CI[CI: ruff + pytest<br/>Python 3.10 · 3.11 · 3.12]
+    CI -->|green| D[Deploy: Hugging Face Space<br/>live demo]
+    CR[cron 07:00 UTC] --> B[Daily bulletin → Telegram]
+```
+
+- **`.github/workflows/ci.yml`**: lint and the test suite on every push and pull request, on three Python versions.
+- **`.github/workflows/deploy_space.yml`**: when CI passes on `main`, `scripts/deploy_space.py` publishes the chat to the [Hugging Face Space](https://huggingface.co/spaces/rgbxv/cava-agent), creating it and setting its secrets if needed.
 - **`.github/workflows/main.yml`**: every day at 07:00 UTC the agent researches the market and posts the bulletin to Telegram. API keys are stored as GitHub Secrets; run it manually with *dry run* to see the bulletin in the job log without sending it.
 
 > **Disclaimer:** Cava Agent output is for informational purposes only and does not constitute financial advice.
@@ -123,12 +140,15 @@ DRY_RUN=1 python daily_bulletin.py     # print today's bulletin
 
 Es el **proyecto de la Unidad 1 del [Hugging Face Agents Course](https://huggingface.co/learn/agents-course)**: parte del `First_agent_template` del curso y convierte mi proyecto anterior, un pipeline fijo con un LLM, en un agente de verdad.
 
+**[🚀 Prueba la demo en directo](https://huggingface.co/spaces/rgbxv/cava-agent)**
+
 ### Qué cambia respecto a la v1
 
 - **El LLM decide**: un `CodeAgent` de smolagents razona en ciclos *Pensamiento → Código → Observación* y elige qué herramientas usar según la pregunta.
 - **Chat interactivo** (Gradio), además del **boletín diario** en Telegram, que ahora también genera el agente.
 - **Cero datos inventados**: el tiempo sale de Open-Meteo y el Bull/Bear se calcula con las medias móviles de 50 y 200 sesiones, ya no es una opinión del LLM.
 - **Cualquier activo**: cualquier ticker de Yahoo Finance y cualquier periodo.
+- **Calidad**: tests automáticos con pytest y CI en GitHub Actions; cada push que pasa los tests se despliega solo en la demo.
 - **LLM intercambiable**: Qwen3.8 27B en Groq (por defecto), Gemini o Qwen2.5-Coder-32B (HF Inference) con la variable `MODEL_PROVIDER`.
 
 ### Preguntas de ejemplo

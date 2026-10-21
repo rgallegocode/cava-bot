@@ -110,7 +110,7 @@ def build_model():
 
 
 def build_agent() -> CodeAgent:
-    with open(PROMPTS_PATH, "r", encoding="utf-8") as stream:
+    with open(PROMPTS_PATH, encoding="utf-8") as stream:
         prompt_templates = yaml.safe_load(stream)
 
     return CodeAgent(

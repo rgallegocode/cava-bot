@@ -1,0 +1,19 @@
+[project]
+name = "cava-agent"
+version = "2.0.0"
+description = "AI financial analyst agent built with smolagents (Hugging Face Agents Course)"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["legacy", ".venv"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, bugbear, pyupgrade
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]  # las líneas largas de prompts y docstrings de tools son intencionadas
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
