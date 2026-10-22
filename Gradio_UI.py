@@ -193,7 +193,9 @@ class GradioUI:
         # The strongly Spanish persona tends to override the system prompt's language rule; a task-level
         # instruction is followed reliably
         task = f"{prompt}\n\n(Write your final answer in the same language as the question above.)"
-        for msg in stream_to_gradio(self.agent, task=task, reset_agent_memory=False):
+        # One agent serves every visitor: keeping memory would pile up all their questions in the context and
+        # break Groq's 7K input-token limit by the second step, so each question starts fresh
+        for msg in stream_to_gradio(self.agent, task=task, reset_agent_memory=True):
             messages.append(msg)
             yield messages
         yield messages
