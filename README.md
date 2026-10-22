@@ -19,6 +19,9 @@
     <b><a href="https://huggingface.co/spaces/rgbxv/cava-agent">🚀 Try the live demo</a></b>
     · <a href="#-español">🇪🇸 Leer en español</a>
   </p>
+
+  <img src="img/chat_demo.gif" alt="Cava Agent chat demo: the agent calls its market tools and answers whether the S&P 500 is in a bull or bear market" width="800"/>
+  <p><sub>The agent plans, calls its tools (Yahoo Finance, SMA50/SMA200 trend, news) and answers with real data.</sub></p>
 </div>
 
 ---
@@ -130,11 +133,22 @@ flowchart LR
 
 > **Disclaimer:** Cava Agent output is for informational purposes only and does not constitute financial advice.
 
-## 📸 Cava Bot in action
+## 📸 Cava Agent in action
 
-<div align="center">
-  <img src="img/prueba.png" alt="Cava Bot Telegram bulletin" width="800"/>
-</div>
+<table>
+  <tr>
+    <th width="50%">Chat: every reasoning step is visible</th>
+    <th width="50%">Daily bulletin posted to Telegram</th>
+  </tr>
+  <tr>
+    <td><img src="img/chat_steps.png" alt="Expanded agent steps showing the Python code and tool calls behind an answer"/></td>
+    <td><img src="img/telegram_bulletin.png" alt="Daily Telegram bulletin in Spanish: weather, 24h news summary, market 'maldades' and bull/bear forecast"/></td>
+  </tr>
+  <tr>
+    <td valign="top">Expand a step to see the code the agent wrote and what each tool returned.</td>
+    <td valign="top">Generated every morning by the same agent from a GitHub Actions cron: weather, 24h news, Cava's <i>"maldades"</i> and a bull/bear call computed from SMA50/SMA200.</td>
+  </tr>
+</table>
 
 ---
 
@@ -144,7 +158,7 @@ flowchart LR
 
 Es el **proyecto de la Unidad 1 del [Hugging Face Agents Course](https://huggingface.co/learn/agents-course)**: parte del `First_agent_template` del curso y convierte mi proyecto anterior, un pipeline fijo con un LLM, en un agente de verdad.
 
-**[🚀 Prueba la demo en directo](https://huggingface.co/spaces/rgbxv/cava-agent)**
+**[🚀 Prueba la demo en directo](https://huggingface.co/spaces/rgbxv/cava-agent)** · [📸 Capturas del chat y del boletín de Telegram](#-cava-agent-in-action)
 
 ### Qué cambia respecto a la v1
 
