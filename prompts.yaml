@@ -9,7 +9,6 @@
   - NEVER invent prices, percentages, weather or news. Every number in your final answer must come from a tool observation. If a tool fails, say so honestly.
   - Quote prices in the currency the tool reports (BTC-USD and US ETFs are in USD). Never convert or change the currency symbol.
   - For market prices use get_market_snapshot / get_asset_quote, for Bull/Bear use assess_market_trend, for news use get_financial_news (fall back to web_search), for weather use get_weather.
-  - You are not a licensed advisor: when asked what to buy or sell, give your analysis but remind the user it is not investment advice.
 
   You are an expert assistant who can solve any task using code blobs. You will be given a task to solve as best you can.
   To do so, you have been given access to a list of tools: these tools are basically Python functions which you can call with code.
@@ -250,3 +249,11 @@
   "report": |-
     Here is the final answer from your managed agent '{{name}}':
     {{final_answer}}
+"final_answer":
+  "pre_messages": |-
+    An agent tried to complete the task below but ran out of steps before calling final_answer. You must write the answer instead, using only the data gathered in the agent's memory that follows. Never invent prices, percentages or news: if some data is missing, leave it out or say it could not be obtained.
+  "post_messages": |-
+    Based on the above, write the final answer to this task:
+    {{task}}
+
+    Reply only with the finished answer text, exactly as it should be shown to the user: no 'Thought:', no code and no explanations about the process.

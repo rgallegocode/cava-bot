@@ -1,5 +1,5 @@
 import pytest
-from smolagents import CodeAgent, HfApiModel, LiteLLMModel
+from smolagents import ChatMessage, CodeAgent, HfApiModel, LiteLLMModel
 
 import agent
 
@@ -43,6 +43,15 @@ def test_build_agent_registers_all_tools(monkeypatch):
     assert isinstance(cava, CodeAgent)
     assert set(cava.tools) == EXPECTED_TOOLS
     assert "Cava Bot" in cava.prompt_templates["system_prompt"]
+
+
+def test_agent_answers_when_max_steps_is_reached(monkeypatch):
+    # Daily bulletin #87 crashed with KeyError: 'final_answer' when the agent ran out of steps
+    monkeypatch.setenv("MODEL_PROVIDER", "groq")
+    cava = agent.build_agent()
+    cava.model = lambda messages, **kwargs: ChatMessage(role="assistant", content="Boletín de emergencia")
+
+    assert cava.provide_final_answer("Escribe el boletín", images=None) == "Boletín de emergencia"
 
 
 def test_timezone_tool():

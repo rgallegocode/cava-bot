@@ -41,9 +41,25 @@ def test_sends_bulletin_to_telegram(monkeypatch, fake_agent):
     assert sent == ["☀️ Test bulletin"]
 
 
+def test_does_not_send_llm_errors_as_bulletin(monkeypatch, fake_agent):
+    monkeypatch.setenv("DRY_RUN", "0")
+    monkeypatch.setattr(fake_agent, "run", lambda task: "Error in generating final LLM output:\n429 Too Many Requests")
+    monkeypatch.setattr(daily_bulletin, "send_telegram", lambda msg: pytest.fail("must not send an LLM error"))
+
+    with pytest.raises(RuntimeError, match="429"):
+        daily_bulletin.main()
+
+
 def test_bulletin_task_keeps_spanish_sections():
     # The bulletin is published in Spanish: its section titles are part of the product
-    for section in ("El tiempo en Málaga", "Resumen de las últimas 24h", "Las Maldades", "Previsión y Cierre"):
+    for section in (
+        "El tiempo en Málaga",
+        "La clave del día",
+        "Cuadro de mercado",
+        "Resumen de las últimas 24h",
+        "Las Maldades",
+        "Previsión y Cierre",
+    ):
         assert section in daily_bulletin.DAILY_BULLETIN_TASK
 
 
