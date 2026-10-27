@@ -23,6 +23,8 @@ def get_financial_news(query: str = "economy OR stock market OR geopolitics", la
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     params = {
         "q": query,
+        # Matching the article body pulls in off-topic pieces that merely mention "bolsa" or "mercados"
+        "searchIn": "title,description",
         "from": yesterday,
         "sortBy": "popularity",
         "language": language,

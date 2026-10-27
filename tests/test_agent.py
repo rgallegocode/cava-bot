@@ -86,6 +86,12 @@ class TestRateLimitedModel:
 
         assert model._required_gap() == pytest.approx(45.0)  # 6000 / 8000 tokens/min
 
+    def test_gap_scales_with_output_tokens_per_minute(self, model):
+        model.output_tokens_per_minute = 1000
+        model._last_tokens, model._last_output_tokens = 2000, 900
+
+        assert model._required_gap() == pytest.approx(54.0)  # 900 / 1000 output tokens/min
+
     def test_retries_on_rate_limit_then_succeeds(self, model, monkeypatch):
         self._fake_llm(monkeypatch, [Exception("RateLimitError 429 tokens per minute"), "ok"])
 

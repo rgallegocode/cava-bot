@@ -37,25 +37,38 @@ def get_current_time_in_timezone(timezone: str) -> str:
 
 
 class RateLimitedLiteLLMModel(LiteLLMModel):
-    """LiteLLMModel tuned for free tiers (Groq: 30 requests and 8K tokens per minute; Gemini: 5 requests per minute).
+    """LiteLLMModel tuned for free tiers (Groq: 30 requests, 8K tokens and 1K output tokens per minute; Gemini: 5 requests per minute).
 
     Every agent step is one LLM call, so calls are spaced out by request rate and tokens consumed, and on a
     429 (quota) or 503 (overload) only that call is retried instead of restarting the whole agent run.
     """
 
-    def __init__(self, *args, min_interval: float = 2.0, tokens_per_minute: int | None = None, max_retries: int = 4, **kwargs):
+    def __init__(
+        self,
+        *args,
+        min_interval: float = 2.0,
+        tokens_per_minute: int | None = None,
+        output_tokens_per_minute: int | None = None,
+        max_retries: int = 4,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.min_interval = min_interval
         self.tokens_per_minute = tokens_per_minute
+        self.output_tokens_per_minute = output_tokens_per_minute
         self.max_retries = max_retries
         self._last_call = 0.0
         self._last_tokens = 0
+        self._last_output_tokens = 0
 
     def _required_gap(self) -> float:
         gap = self.min_interval
         if self.tokens_per_minute:
             # The previous call's tokens must fit within the one-minute window
             gap = max(gap, self._last_tokens / self.tokens_per_minute * 60)
+        if self.output_tokens_per_minute:
+            # Output tokens have their own, much smaller, per-minute budget
+            gap = max(gap, self._last_output_tokens / self.output_tokens_per_minute * 60)
         return gap
 
     def __call__(self, *args, **kwargs):
@@ -66,7 +79,8 @@ class RateLimitedLiteLLMModel(LiteLLMModel):
             self._last_call = time.monotonic()
             try:
                 response = super().__call__(*args, **kwargs)
-                self._last_tokens = (self.last_input_token_count or 0) + (self.last_output_token_count or 0)
+                self._last_output_tokens = self.last_output_token_count or 0
+                self._last_tokens = (self.last_input_token_count or 0) + self._last_output_tokens
                 return response
             except Exception as e:
                 retryable = any(code in str(e) for code in ("429", "503", "RateLimit", "UNAVAILABLE", "Timeout"))
@@ -86,6 +100,9 @@ def build_model():
     if provider == "groq":
         return RateLimitedLiteLLMModel(
             tokens_per_minute=int(os.environ.get("GROQ_TPM", "8000")),
+            output_tokens_per_minute=int(os.environ.get("GROQ_OTPM", "1000")),
+            # Groq rejects a request whose max_tokens exceeds the output-tokens-per-minute limit
+            max_tokens=int(os.environ.get("GROQ_MAX_TOKENS", "1000")),
             model_id=os.environ.get("GROQ_MODEL", "groq/qwen/qwen3.8-27b"),
             api_key=os.environ.get("GROQ_API_KEY"),
             temperature=0.5,

@@ -19,18 +19,21 @@ STEP 1 - Gather all the data in ONE single code block, printing every result:
 - for each ticker in ["^GSPC", "^IXIC", "^STOXX50E", "^IBEX", "^VIX", "^TNX", "EURUSD=X", "GC=F", "BZ=F"]:
   print(get_asset_quote(ticker))
 - assess_market_trend("URTH")
-- get_financial_news(query="economía OR bolsa OR mercados OR inflación OR BCE OR Fed OR aranceles OR petróleo", language="es")
+- get_financial_news(query='Ibex OR "Wall Street" OR BCE OR "Reserva Federal" OR inflación OR petróleo', language="es")
+- get_financial_news(query='stocks OR "Federal Reserve" OR ECB OR "Treasury yields" OR "oil prices"', language="en")
 Do NOT use web_search or visit_webpage unless get_financial_news returns an error: they waste steps on paywalled pages.
 
-STEP 2 - Write the message and return it with final_answer. Do not gather more data.
+STEP 2 - Write the message and return it with final_answer. Do not gather more data, even if the news is weak:
+work with what you have. Keep your Thought to one short line: your output budget is about 1,000 tokens.
 
 RULES:
 - Every number must come from the tool results. If a quote failed, omit that line; never estimate it.
 - ^TNX is the US 10-year Treasury yield in % (show it as "4,25%", not as a price). ^VIX is in points.
 - Only report news that appears in the tool results and actually moves markets; skip anything else.
+  If no headline explains a big move, say so in one line instead of guessing the cause.
 - Explain the "why": connect each move to its cause when the news supports it. No generic filler
   ("los mercados estarán atentos", "volatilidad"), no investment disclaimer at the end.
-- Telegram simple Markdown: *bold* only, no tables, no headings with #. Keep the whole message under 2,500 characters.
+- Telegram simple Markdown: *bold* only, no tables, no headings with #. Keep the whole message under 1,800 characters.
 
 MANDATORY MESSAGE STRUCTURE:
 

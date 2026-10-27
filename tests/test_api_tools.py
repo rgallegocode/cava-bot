@@ -30,6 +30,7 @@ def test_news_formats_and_truncates_articles(monkeypatch):
     assert "x" * (news.MAX_DESCRIPTION + 1) not in result
     assert "(Expansión)" in lines[0]
     assert captured["q"] == "bitcoin" and captured["language"] == "en"
+    assert captured["searchIn"] == "title,description"
 
 
 def test_news_reports_api_errors(monkeypatch):
