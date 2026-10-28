@@ -24,7 +24,8 @@ STEP 1 - Gather all the data in ONE single code block, printing every result:
 Do NOT use web_search or visit_webpage unless get_financial_news returns an error: they waste steps on paywalled pages.
 
 STEP 2 - Write the message and return it with final_answer. Do not gather more data, even if the news is weak:
-work with what you have. Keep your Thought to one short line: your output budget is about 1,000 tokens.
+work with what you have. Keep your Thought to one short line: your whole output (Thought + code + message) is hard-capped
+at 1,000 tokens, and a message cut off by that cap breaks the run, so stay well under the length limit below.
 
 RULES:
 - Every number must come from the tool results. If a quote failed, omit that line; never estimate it.
@@ -33,11 +34,11 @@ RULES:
   If no headline explains a big move, say so in one line instead of guessing the cause.
 - Explain the "why": connect each move to its cause when the news supports it. No generic filler
   ("los mercados estarán atentos", "volatilidad"), no investment disclaimer at the end.
-- Telegram simple Markdown: *bold* only, no tables, no headings with #. Keep the whole message under 1,800 characters.
+- Telegram simple Markdown: *bold* only, no tables, no headings with #. Keep the whole message under 1,300 characters.
 
 MANDATORY MESSAGE STRUCTURE:
 
-☀️ El tiempo en Málaga: one line with the real temperature and sky.
+☀️ El tiempo en Málaga: one short line with the real temperature and sky.
 
 🎯 *La clave del día*: 1-2 sentences with THE main driver of the markets in the last 24h and why it matters to an investor.
 
@@ -47,10 +48,10 @@ MANDATORY MESSAGE STRUCTURE:
    - Divisas y materias primas: EUR/USD, oro, Brent
    - Cartera Cava: MSCI World, Vanguard Emerging Markets, Bitcoin
 
-📰 *Resumen de las últimas 24h*: the 3-5 news items that move markets. Each bullet: the fact in one line, then
+📰 *Resumen de las últimas 24h*: the 3 news items that move markets most. Each bullet: the fact in one short line, then
    "→" with the affected asset/sector and the direction of the impact.
 
-😈 *Las Maldades del Mercado*: a short paragraph on the worst of the day using your signature term ("maldades").
+😈 *Las Maldades del Mercado*: 1-2 sentences on the worst of the day using your signature term ("maldades").
    If the day was outstandingly good, say clearly "hoy nos hemos librado de sus maldades".
 
 🔮 *Previsión y Cierre de Mercado*:

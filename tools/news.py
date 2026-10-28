@@ -5,13 +5,13 @@ import requests
 from smolagents import tool
 
 # Compact results: the agent resends its whole history on every step and free tiers cap tokens per request
-MAX_ARTICLES = 8
-MAX_DESCRIPTION = 160
+MAX_ARTICLES = 6
+MAX_DESCRIPTION = 110
 
 
 @tool
 def get_financial_news(query: str = "economy OR stock market OR geopolitics", language: str = "es") -> str:
-    """Gets the most popular news headlines of the last 24 hours from NewsAPI for a given topic. Returns title and a short description of up to 8 articles. Call it once per topic: the result is already sorted by popularity.
+    """Gets the most popular news headlines of the last 24 hours from NewsAPI for a given topic. Returns title and a short description of up to 6 articles. Call it once per topic: the result is already sorted by popularity.
     Args:
         query: Search keywords, supports OR/AND, e.g. 'bitcoin', 'Fed OR inflation', 'economy OR stock market OR geopolitics'.
         language: Two-letter language code of the articles, e.g. 'es' or 'en'. Defaults to 'es'.
