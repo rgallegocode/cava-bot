@@ -2,8 +2,8 @@ name: Daily bulletin
 
 on:
   schedule:
-    # 07:00 UTC (08:00/09:00 in Spain depending on daylight saving time)
-    - cron: '00 07 * * *'
+    # 01:00 UTC (03:00/04:00 in Spain depending on daylight saving time)
+    - cron: '00 01 * * *'
   workflow_dispatch: # manual run button
     inputs:
       dry_run:
