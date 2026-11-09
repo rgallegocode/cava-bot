@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 from conftest import FakeResponse
 
@@ -28,7 +30,7 @@ def test_dry_run_prints_without_sending(monkeypatch, capsys, fake_agent):
     daily_bulletin.main()
 
     assert "Test bulletin" in capsys.readouterr().out
-    assert fake_agent.tasks == [daily_bulletin.DAILY_BULLETIN_TASK]
+    assert fake_agent.tasks[0] in (daily_bulletin.WEEKDAY_BULLETIN_TASK, daily_bulletin.WEEKEND_BULLETIN_TASK)
 
 
 def test_sends_bulletin_to_telegram(monkeypatch, fake_agent):
@@ -50,17 +52,38 @@ def test_does_not_send_llm_errors_as_bulletin(monkeypatch, fake_agent):
         daily_bulletin.main()
 
 
-def test_bulletin_task_keeps_spanish_sections():
+def test_weekdays_get_the_market_report_and_weekends_the_monday_preview():
+    # 2026-11-09 is a Monday
+    for day in range(9, 14):
+        assert daily_bulletin.bulletin_task(date(2026, 11, day)) is daily_bulletin.WEEKDAY_BULLETIN_TASK
+    for day in (14, 15):
+        assert daily_bulletin.bulletin_task(date(2026, 11, day)) is daily_bulletin.WEEKEND_BULLETIN_TASK
+
+
+def test_bulletin_tasks_keep_spanish_sections():
     # The bulletin is published in Spanish: its section titles are part of the product
     for section in (
         "El tiempo en Málaga",
         "La clave del día",
-        "Cuadro de mercado",
+        "Cartera Cava",
         "Resumen de las últimas 24h",
         "Las Maldades",
-        "Previsión y Cierre",
+        "Tendencia y qué vigilar",
     ):
-        assert section in daily_bulletin.DAILY_BULLETIN_TASK
+        assert section in daily_bulletin.WEEKDAY_BULLETIN_TASK
+    for section in (
+        "El tiempo en Málaga",
+        "Lo que puede mover la bolsa el lunes",
+        "Balance de la semana",
+        "Las Maldades",
+    ):
+        assert section in daily_bulletin.WEEKEND_BULLETIN_TASK
+
+
+def test_bulletin_tasks_only_quote_the_three_reference_assets():
+    for task in (daily_bulletin.WEEKDAY_BULLETIN_TASK, daily_bulletin.WEEKEND_BULLETIN_TASK):
+        assert "get_market_snapshot()" in task
+        assert "get_asset_quote" not in task
 
 
 def test_telegram_falls_back_to_plain_text_on_bad_markdown(monkeypatch):

@@ -24,14 +24,26 @@ def test_asset_quote_single_session_has_no_change(fake_ticker):
     assert "market closed / no change" in market_data.get_asset_quote(ticker="BTC-USD")
 
 
-def test_market_snapshot_includes_reference_assets(fake_ticker):
-    fake_ticker(market_data, [10.0, 9.0])
+def test_market_snapshot_reports_day_and_week_change(fake_ticker):
+    # Business days ending 2026-10-20: the close one week earlier is 2026-10-13 (100.0)
+    fake_ticker(market_data, [100.0, 101.0, 102.0, 103.0, 104.0, 110.0])
 
     result = market_data.get_market_snapshot()
 
     for ticker in ("URTH", "VWO", "BTC-USD"):
         assert ticker in result
-    assert "-10.00%" in result
+    assert "day: +5.77%" in result  # 110 vs 104
+    assert "week: +10.00%" in result  # 110 vs 100
+    assert "close date: 2026-10-20" in result
+
+
+def test_market_snapshot_omits_week_change_without_a_week_of_history(fake_ticker):
+    fake_ticker(market_data, [10.0, 9.0])
+
+    result = market_data.get_market_snapshot()
+
+    assert "day: -10.00%" in result
+    assert "week:" not in result
 
 
 def test_trend_detects_bull_market(fake_ticker):

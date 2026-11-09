@@ -71,7 +71,7 @@ flowchart LR
 
 | Tool | What it does | Source |
 |---|---|---|
-| `get_market_snapshot` | Close and daily change of MSCI World (URTH), Vanguard EM (VWO) and Bitcoin | Yahoo Finance |
+| `get_market_snapshot` | Close, daily and 1-week change of MSCI World (URTH), Vanguard EM (VWO) and Bitcoin | Yahoo Finance |
 | `get_asset_quote` | Close, daily and period change for any ticker (`^GSPC`, `^IBEX`, `AAPL`, `EURUSD=X`…) | Yahoo Finance |
 | `assess_market_trend` | Bull / Bear / sideways classification from SMA50/SMA200 and 52-week drawdown | Yahoo Finance |
 | `get_financial_news` | Most popular headlines of the last 24h for a topic | NewsAPI |
@@ -129,7 +129,7 @@ flowchart LR
 
 - **`.github/workflows/ci.yml`**: lint and the test suite on every push and pull request, on three Python versions.
 - **`.github/workflows/deploy_space.yml`**: when CI passes on `main`, `scripts/deploy_space.py` publishes the chat to the [Hugging Face Space](https://huggingface.co/spaces/rgbxv/cava-agent), creating it and setting its secrets if needed.
-- **`.github/workflows/main.yml`**: every day at 07:00 UTC the agent researches the market and posts the bulletin to Telegram. API keys are stored as GitHub Secrets; run it manually with *dry run* to see the bulletin in the job log without sending it.
+- **`.github/workflows/main.yml`**: every day at 07:00 UTC the agent researches the market and posts the bulletin to Telegram: a market report from Monday to Friday, and on weekends (markets closed) a preview of the news that can move Monday's open. API keys are stored as GitHub Secrets; run it manually with *dry run* to see the bulletin in the job log without sending it.
 
 > **Disclaimer:** Cava Agent output is for informational purposes only and does not constitute financial advice.
 

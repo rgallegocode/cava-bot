@@ -1,3 +1,4 @@
+import pandas as pd
 import yfinance as yf
 from smolagents import tool
 
@@ -52,9 +53,32 @@ def get_asset_quote(ticker: str, period: str = "5d") -> str:
     return _quote_line(ticker, ticker, period)
 
 
+def _snapshot_line(name: str, ticker: str) -> str:
+    """One line with the latest close, the change vs. the previous close and the change vs. one week earlier."""
+    try:
+        asset = yf.Ticker(ticker)
+        history = asset.history(period="1mo")
+        if history.empty:
+            return f"- {name} ({ticker}): no data"
+        closes = history["Close"]
+        last_close = closes.iloc[-1]
+        line = f"- {name} ({ticker}): {last_close:,.2f}{_currency(asset)}"
+        if len(closes) >= 2:
+            day_change = (last_close / closes.iloc[-2] - 1) * 100
+            line += f" | day: {day_change:+.2f}%"
+        # Last close at least 7 calendar days before the latest one: a true week for ETFs and for 24/7 Bitcoin alike
+        week_ago = closes[closes.index <= closes.index[-1] - pd.Timedelta(days=7)]
+        if not week_ago.empty:
+            week_change = (last_close / week_ago.iloc[-1] - 1) * 100
+            line += f" | week: {week_change:+.2f}%"
+        return line + f" | close date: {closes.index[-1].date()}"
+    except Exception as e:
+        return f"- {name} ({ticker}): error fetching data ({e})"
+
+
 @tool
 def get_market_snapshot() -> str:
-    """Gets today's closing price and daily change for Cava Bot's reference assets: MSCI World (URTH), Vanguard Emerging Markets (VWO) and Bitcoin (BTC-USD). Use it for the daily market report.
+    """Gets the latest close, the daily change and the 1-week change of Cava Bot's reference assets: MSCI World (URTH), Vanguard Emerging Markets (VWO) and Bitcoin (BTC-USD). Use it for the daily market report.
     """
-    lines = [_quote_line(name, ticker) for name, ticker in DEFAULT_ASSETS.items()]
+    lines = [_snapshot_line(name, ticker) for name, ticker in DEFAULT_ASSETS.items()]
     return "📊 REAL MARKET DATA:\n" + "\n".join(lines)
